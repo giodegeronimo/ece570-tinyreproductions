@@ -1,0 +1,24 @@
+\section{Experiments}
+\subsection{Zero-Filled Sanity Sweep}
+\begin{itemize}
+    \item Evaluate 64 validation slices across $R \in \{2,4,6,8\}$ and ACS $\in \{8,16,24\}$; store metrics in \texttt{results/<timestamp>\_zerofill/zero\_fill\_metrics.csv}.
+    \item Recreate the grid from Cole et al.\ showing how larger ACS mitigates aliasing at each $R$ (placeholder Figure~\ref{fig:zerofill_grid}); this figure also doubles as a preprocessing sanity check.
+    \item Talk about notable observations: PSNR drops monotonically with $R$, ACS width provides $\approx$2\,dB boost at each $R$.
+\end{itemize}
+\subsection{Real U-Net Baseline}
+\begin{itemize}
+    \item Train for 15 epochs (Adam, LR=$5\times10^{-5}$) on the 1,024/256 subset; log metrics per epoch and save best/latest checkpoints.
+    \item Include a plot of training/validation curves (placeholder Figure~\ref{fig:training_curve}) to demonstrate stability after lowering the LR.
+    \item Generate qualitative PNGs for consistent slice indices (e.g., index 50) to reuse later in the real vs.\ complex comparison.
+\end{itemize}
+\subsection{Complex U-Net Reproduction}
+\begin{itemize}
+    \item Repeat the exact training loop with the complex U-Net and note any differences (e.g., gradient explosions at LR=$1\times10^{-4}$, resolved by halving the LR); cite debug notebook in Appendix.
+    \item Save per-epoch metrics and generate qualitative PNGs for the same slice as the real baseline; compute per-pixel difference heatmaps saved under \texttt{qualitative/} for later figure assembly.
+    \item Table~\ref{tab:main_results} will summarize zero-fill vs.\ real vs.\ complex metrics; discuss whether the complex model hits the hypothesized PSNR/SSIM margins.
+\end{itemize}
+\subsection{Additional Ablations (if executed)}
+\begin{itemize}
+    \item Optional ideas (even if not run, mention as future work): alternate ACS widths at $R=4$, testing complex activations (modReLU/cardioid), or comparing different qualitative slice indices.
+    \item Placeholder for a table/figure if time permits (e.g., Table~\ref{tab:ablation}).
+\end{itemize}

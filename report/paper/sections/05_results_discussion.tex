@@ -1,0 +1,21 @@
+\section{Results and Discussion}
+\subsection{Quantitative Summary}
+\begin{itemize}
+    \item Refer to Table~\ref{tab:main_results} for PSNR/SSIM/L1 across zero-fill, real U-Net, and complex U-Net.
+    \item Highlight whether the complex model meets the hypothesized margins and how far we are from the absolute values reported by \citet{cole2020analysisdeepcomplexvaluedconvolutional}.
+\end{itemize}
+\subsection{Qualitative Observations}
+\begin{itemize}
+    \item Describe takeaways from Figure~\ref{fig:qualitative}: complex recon preserves cartilage edges / ligaments better than the real baseline; zero-fill shows pronounced streaks.
+    \item Mention optional difference maps or zoomed crops saved alongside the qualitative PNGs to visualize where improvements concentrate.
+\end{itemize}
+\subsection{Training Stability and Debugging}
+\begin{itemize}
+    \item Note that the complex model diverged at LR=$1\times10^{-4}$; cite the debug notebook (loss printouts) and justify the final LR choice.
+    \item Reference Figure~\ref{fig:training_curve} (train/val losses) to show both models converge smoothly after the LR adjustment.
+\end{itemize}
+\subsection{Discrepancies vs.\ Original Paper}
+\begin{itemize}
+    \item Discuss expected gaps: single-coil vs.\ multi-coil, fewer epochs, smaller dataset, no phase metrics.
+    \item Point out any remaining shortcomings (e.g., SSIM plateau, limited qualitative variety) that readers should keep in mind.
+\end{itemize}

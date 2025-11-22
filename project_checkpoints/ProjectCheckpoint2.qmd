@@ -1,0 +1,157 @@
+---
+title: "ECE 570 — Tiny Reproductions (Checkpoint 2)"
+subtitle: "Complex-Valued CNNs for MRI Reconstruction"
+author: "Giovanni De Geronimo"
+date: "October 25, 2025"
+format:
+  revealjs:
+    theme: default
+    slide-number: true
+    controls: true
+    progress: true
+    transition: fade
+    width: 1600
+    height: 900
+    code-overflow: scroll
+    code-copy: true
+    code-line-numbers: true
+    include-in-header:
+      text: |
+        <style>
+        /* Vertical & horizontal scrolling for code */
+        .reveal pre code {
+          max-height: 72vh;
+          overflow-y: auto;
+          overflow-x: auto;
+          display: block;
+        }
+        /* Scrollable tables so wide tables aren't truncated */
+        .reveal section table {
+          display: block;
+          overflow-x: auto;
+          overflow-y: auto;
+          white-space: nowrap;
+          max-width: 100%;
+          max-height: 72vh;
+        }
+        /* Tighter spacing for bullets and paragraphs */
+        .reveal p { margin: 0.4em 0; }
+        .reveal ul { margin: 0.5em 0 0.5em 1.2em; }
+        .reveal ol { margin: 0.5em 0 0.5em 1.4em; }
+        </style>
+jupyter: python3
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Slide 1 — Updated Problem Statement & Goal
+
+- **Problem.** Reconstruct high-quality MR images from **undersampled single-coil k-space** to shorten scan time while limiting artifacts.
+- **Primary goal / hypothesis.** A **complex-valued U-Net** will **outperform an equivalent real-valued U-Net** (matched depth/width/params) on fastMRI knees, measured by PSNR/SSIM/L1—beyond the zero-filled baseline.
+- **What changed since CP1.** Sharpened focus on: (i) a rock-solid **preprocessing + masking** baseline, (ii) **complex-safe skip alignment**, and (iii) staging an **apples-to-apples complex vs. real** comparison.
+
+---
+
+## Slide 2 — Updated Methodology & Progress
+
+- **Dataset.** [fastMRI Single-Coil Knee](https://fastmri.med.nyu.edu/).
+- **Preprocessing.** 1D **equispaced undersampling** with contiguous **ACS**, then **centered IFFT** (ortho) to magnitude images.
+- **Models.** **Complex ops** (Conv/ConvT, CReLU) in a **U-Net** encoder–decoder; **real-valued** U-Net baseline will be **capacity-matched** for a fair comparison.
+- **Training loop.** Implemented (PyTorch/Adam/MPS); short runs next.
+- **Progress since CP1.**
+  - Implemented **mask** + **ACS**.
+  - Fixed **skip shape mismatches** (odd dims / stride) with per-component resize.
+  - Produced a **new zero-filled baseline** across multiple **R** and **ACS** values (table + figure).
+
+---
+
+## Slide 3 — Code Snippet 1 (≤ 20 lines): `mask_1d_equispaced`
+
+```python
+def mask_1d_equispaced(N: int, accel: int = 4, acs: int = 24, offset: int = 0):
+    '''
+    N: length along the masked axis (e.g., 640 or 368)
+    accel: target acceleration (e.g., 4 => ~25% lines kept)
+    acs: contiguous fully-sampled center size
+    offset: phase for the stride pattern (0..accel-1)
+    '''
+    mask = torch.zeros(N, dtype=torch.bool)
+    # center ACS
+    c0 = (N - acs) // 2
+    mask[c0:c0+acs] = True
+    # equispaced outside ACS
+    for i in range(N):
+        if i < c0 or i >= c0+acs:
+            if ((i - offset) % accel) == 0:
+                mask[i] = True
+    return mask
+```
+
+---
+
+## Slide 4 — Explanation of Snippet 1
+
+- Generates a **1D phase-encode mask** with fully sampled **ACS** and **equispaced** outer lines.
+- **ACS** preserves low-frequency structure; the acceleration **R** comes from the stride on outer lines.
+- The **offset** parameter phases the sampling pattern across slices/volumes (helps avoid coherent aliasing).
+- This function is the **entry point** to all results shown later (both the table and figure use it).
+
+---
+
+## Slide 5 — Code Snippet 2 (≤ 20 lines): Decoder Upsample & Shape-Match
+
+```python
+# Inside ComplexUnet.forward (decoder block)
+for up_block, dec_block, skip in zip(self.up_blocks, self.dec_blocks, skips):
+    x = up_block(x)
+    if x.shape[-2:] != skip.shape[-2:]:
+        x_re = F.interpolate(x.real, size=skip.shape[-2:], mode='bilinear', align_corners=False)
+        x_im = F.interpolate(x.imag, size=skip.shape[-2:], mode='bilinear', align_corners=False)
+        x = x_re + 1j * x_im
+    x = dec_block(x + skip)
+```
+
+---
+
+## Slide 6 — Explanation of Snippet 2
+
+- **Why mismatches happen.** Odd image sizes and downsampling (**pool/stride**) **floor** dimensions; **ConvTranspose2d** then may not invert size exactly, producing off-by-one **spatial shapes**.
+- **Complex-safe fix.** Resize **real** and **imag** parts **separately**, recombine, then add the **skip**—ensuring stable shapes before each decoder block.
+- This is critical for **gradient flow** and to keep the U-Net **fully complex** end-to-end.
+
+---
+
+## Slide 7 — New Preliminary Result (since CP1)
+
+**Zero-filled baseline across \(R\in\{2,4,6,8\}\) and \(ACS\in\{8,16,24\}\), on 64 validation slices.**
+
+| accel (R) | ACS |   N | PSNR(dB)_mean | PSNR_std | SSIM_mean | SSIM_std | L1_mean | L1_std |
+|:-----:|:------------------:|----:|--------------:|---------:|----------:|---------:|--------:|-------:|
+| 2 | 8  | 64 | 24.809 | 2.597 | 0.888 | 0.091 | 0.046 | 0.017 |
+| 2 | 16 | 64 | 26.542 | 2.893 | 0.918 | 0.092 | 0.038 | 0.017 |
+| 2 | 24 | 64 | 27.581 | 3.133 | 0.930 | 0.091 | 0.034 | 0.017 |
+| 4 | 8  | 64 | 22.749 | 2.632 | 0.819 | 0.133 | 0.057 | 0.022 |
+| 4 | 16 | 64 | 24.482 | 2.862 | 0.872 | 0.135 | 0.048 | 0.022 |
+| 4 | 24 | 64 | 25.515 | 3.058 | 0.891 | 0.134 | 0.043 | 0.022 |
+| 6 | 8  | 64 | 22.090 | 2.618 | 0.790 | 0.143 | 0.061 | 0.024 |
+| 6 | 16 | 64 | 23.996 | 2.905 | 0.857 | 0.148 | 0.051 | 0.024 |
+| 6 | 24 | 64 | 24.989 | 3.092 | 0.879 | 0.147 | 0.046 | 0.024 |
+| 8 | 8  | 64 | 21.862 | 2.649 | 0.778 | 0.150 | 0.063 | 0.026 |
+| 8 | 16 | 64 | 23.614 | 2.876 | 0.847 | 0.153 | 0.053 | 0.025 |
+| 8 | 24 | 64 | 24.677 | 3.062 | 0.871 | 0.153 | 0.048 | 0.025 |
+
+**Qualitative grid** (GT at left; columns vary **\(\mathrm{ACS}\)**; rows vary **\(R\)**):  
+![](https://drive.google.com/uc?export=download&id=1Bis2dJhDm4xdGG1a6EyRcDOCM-aYRowa){width=1200}
+
+---
+
+## Slide 8 — Result Analysis & Next Steps
+
+- **What it shows.** Increasing **R** degrades quality (PSNR/SSIM ↓, L1 ↑); increasing **ACS** recovers low-frequency structure. This validates the **mask + IFFT** pipeline and establishes a **quantitative baseline**.
+- **Toward the hypothesis.** Next we will **hold capacity constant** and compare the **complex U-Net vs a real-valued U-Net** trained under identical settings to test whether complex representations confer a measurable advantage.
+- **Immediate next steps.**
+  1) Add **complex norm** (BN/IN) for stability.  
+  2) Train short runs; report **complex − real** deltas (PSNR/SSIM/L1).  
+  3) Compare **pooling** (avg vs. component-wise max vs. magnitude max).

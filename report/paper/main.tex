@@ -1,0 +1,50 @@
+
+\documentclass{article} % For LaTeX2e
+\usepackage{template/iclr2026_template/iclr2026_conference}
+\usepackage{times}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+
+\usepackage{hyperref}
+\usepackage{url}
+
+
+\title{Complex-Valued CNNs for fastMRI Knee Reconstruction: A Tiny Reproduction}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Anonymous Authors \\
+Anonymous Institution \\
+\texttt{anonymous@tinyreproductions.edu}}
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+\begin{document}
+
+
+\maketitle
+
+% Outline content placeholder until sections are populated.
+
+\begin{abstract}
+\textbf{Motivation.} Rapid MRI requires aggressive undersampling, but zero-filled reconstructions yield ringing and blur. \textbf{Goal.} Reproduce the key claim of \citet{cole2020analysisdeepcomplexvaluedconvolutional}: capacity-matched complex-valued CNNs outperform real-valued CNNs on accelerated single-coil knee data. \textbf{Approach.} fastMRI single-coil knee dataset, equispaced undersampling with ACS, complex U-Net vs. real U-Net, identical training/evaluation protocols. \textbf{Findings.} Outline planned quantitative comparison (PSNR/SSIM/L1 deltas), qualitative improvements, and reproducibility contributions. (Will be replaced with final summary.)
+\end{abstract}
+
+\input{sections/00_introduction}
+\input{sections/01_background}
+\input{sections/02_targets}
+\input{sections/03_methodology}
+\input{sections/04_experiments}
+\input{sections/05_results_discussion}
+\input{sections/06_limitations}
+\input{sections/07_conclusion}
+
+\bibliography{refs}
+\bibliographystyle{template/iclr2026_template/iclr2026_conference}
+
+\end{document}

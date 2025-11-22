@@ -1,0 +1,22 @@
+\section{Reproduction Target and Goals}
+\subsection{Target from Cole et al.}
+\begin{itemize}
+    \item Recreate the $R=4$ U-Net comparison (complex vs.\ real) focusing on PSNR/SSIM/L1 deltas and qualitative slices that illustrate detail retention.
+    \item Figures/tables to plan: Table~\ref{tab:main_results} (metrics) and Figure~\ref{fig:qualitative} (side-by-side reconstructions).
+\end{itemize}
+\subsection{Hypotheses}
+\begin{itemize}
+    \item H1: Complex U-Net outperforms the real U-Net by $\ge 0.3$\,dB PSNR and $\ge 0.01$ SSIM at $R=4$, ACS $=24$.
+    \item H2: Complex outputs suppress aliasing along cartilage edges / ligaments versus the real baseline when visualized on the same slices.
+    \item H3: With the reduced learning rate both models show stable training curves (validated via debug notebook plots).
+\end{itemize}
+\subsection{Acceptance Criteria}
+\begin{itemize}
+    \item Monotonic trend: zero-fill $<$ real U-Net $<$ complex U-Net for reported metrics.
+    \item Identical hyperparameters (LR, optimizer, dataset subsets, epochs, seed) across real/complex runs; any deviations must be documented.
+\end{itemize}
+\subsection{Scope and Simplifications}
+\begin{itemize}
+    \item Single-coil fastMRI knee only, 1,024/256 slices, 15 epochs, one seed.
+    \item No multi-coil experiments, adversarial losses, or alternate architectures to keep the reproduction tractable.
+\end{itemize}

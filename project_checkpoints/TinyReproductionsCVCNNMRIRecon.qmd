@@ -1,0 +1,35 @@
+---
+title: "TinyReproductions - CVCNN for MRI Reconstruction"
+format: revealjs
+editor: visual
+---
+## Problem - TinyReproductions
+- **Goal:** Reproduce the claim that **complex-valued CNNs (CV-CNNs)** reconstruct undersampled MRI **better than** equally-sized two-channel real CNNs.
+- **Why it matters:** Faster MRI (via undersampling) needs high-quality reconstruction; preserving **magnitude + phase** can reduce artifacts and enable phase-based applications.
+- **Scope/Feasibility (semester):** Use a small subset of public data (e.g., fastMRI) or phantoms; compare **real U-Net-style** vs **complex U-Net-style** with matched parameters.
+- **Success criterion:** CV-CNN improves SSIM/PSNR over real CNN under the same training/data budget.
+
+## Paper 1 - Target
+- **Cole et al., 2021 (ISMRM)** — *Analysis of Deep Complex-Valued CNNs for MRI Reconstruction.*  
+  https://onlinelibrary.wiley.com/doi/10.1002/mrm.28733  
+  - **Main contribution:** End-to-end CV-CNNs outperform two-channel real CNNs for accelerated MRI; analyze complex activations and training stability.  
+  - **Relation:** This is the **claim to reproduce** on a smaller setup.
+
+## Paper 2 - Foundations
+- **Trabelsi et al., 2018 (ICLR)** — *Deep Complex Networks.*  
+  https://arxiv.org/abs/1705.09792  
+  - **Main contribution:** Building blocks for complex nets (complex conv, batch-norm, init, activations like modReLU).  
+  - **Relation:** Supplies **layers/ops** needed to implement the CV-CNN fairly.
+
+## Paper 3 - Baseline MRI DL
+- **Hammernik et al., 2018 (ISMRM)** — *Learning a Variational Network for Reconstruction of Accelerated MRI Data.*  
+  https://onlinelibrary.wiley.com/doi/10.1002/mrm.26977  
+  - **Main contribution:** Strong real-valued reconstruction (unrolled variational net) widely used as a benchmark.  
+  - **Relation:** Contextual baseline family; our **real CNN** baseline is simpler but aligned with prevalent real-valued practice.
+
+## Evaluation Metrics
+- **Primary:** **ΔSSIM** and **ΔPSNR** between CV-CNN and matched real CNN on the same test set.  
+  - **Justification:** If CV-CNN truly preserves structure/detail better, **SSIM↑/PSNR↑** vs real CNN should hold.  
+- **Performance tiers (ΔSSIM, absolute points):** Poor < +0.00; Okay +0.00–+0.01; Good +0.01–+0.02; Excellent > +0.02.  
+- **Performance tiers (ΔPSNR, dB):** Poor < +0.2; Okay +0.2–+0.5; Good +0.5–+1.0; Excellent > +1.0.  
+- **Bounds/context:** Zero-filled recon gives a low baseline; all models should exceed it. Reproduction judged by **direction + magnitude** of Δ vs. paper’s claim.

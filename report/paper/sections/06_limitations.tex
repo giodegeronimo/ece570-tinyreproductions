@@ -1,0 +1,8 @@
+\section{Limitations and Future Work}
+\begin{itemize}
+    \item \textbf{Data / compute budget.} Only 1,024/256 slices and 15 epochs; reproducing the full paper would require multi-dataset training and more aggressive augmentations.
+    \item \textbf{Hyperparameters.} We tuned the learning rate manually; no systematic sweep or cross-validation was performed. Complex models remain sensitive to LR and could benefit from gradient clipping or advanced optimizers.
+    \item \textbf{Architecture scope.} We focused solely on U-Nets. Cole et al.\ also studied unrolled networks and activation variants (modReLU, zReLU); these are future work items.
+    \item \textbf{Phase evaluation.} We only report magnitude metrics; the original paper emphasized phase reconstruction quality. Adding velocity/phase-sensitive metrics would strengthen the story.
+    \item \textbf{Future extensions.} Multi-coil experiments, different accelerations, activation function ablations, and exploring robustness to mask offsets.
+\end{itemize}

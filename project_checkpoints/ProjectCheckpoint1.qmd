@@ -1,0 +1,70 @@
+---
+title: "Project Checkpoint 1 — TinyReproductions: Complex-Valued CNNs for MRI"
+format: 
+  revealjs:
+    slide-number: true
+    embed-resources: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## 1) Problem Statement & Goal
+
+-   **Problem:** Undersampled MRI accelerates scans but introduces artifacts. Many recon nets treat k-space/image as two real channels, potentially discarding phase structure.
+-   **Goal/Hypothesis:** **Complex-valued CNNs (CV-CNNs)** that preserve magnitude **and** phase **reconstruct better** than parameter-matched two-channel real CNNs.
+-   **Tiny Reproduction:** Show ΔSSIM/ΔPSNR (CV − Real) \> 0 on a small subset.
+
+## 2) Methodology Overview
+
+-   **Compare:** Real U-Net-style baseline **vs** Complex U-Net-style (matched depth/width/params).
+-   **Key ops:** ComplexConv2d + **CReLU** (complex ReLU).
+-   **Sanity now:** Prove end-to-end complex forward/backprop works (toy data).
+-   **Next:** Use a tiny fastMRI split; compute SSIM/PSNR; report Δ with CIs.
+
+------------------------------------------------------------------------
+
+## 3) Code Snippet 1 — Complex Convolution (≤20 lines)
+
+\`\`\`{.python} import torch, torch.nn as nn
+
+class ComplexConv2d(nn.Module): def **init**(self, in_ch, out_ch, k, stride=1, padding=0, bias=True): super().\_\_init\_\_() self.wr = nn.Conv2d(in_ch, out_ch, k, stride=stride, padding=padding, bias=bias) self.wi = nn.Conv2d(in_ch, out_ch, k, stride=stride, padding=padding, bias=bias)
+
+```         
+def forward(self, x):
+    a, b = x.real, x.imag                 # x = a + i b
+    xr = self.wr(a) - self.wi(b)          # Re(W*x) = (X*a - Y*b)
+    xi = self.wi(a) + self.wr(b)          # Im(W*x) = (Y*a + X*b)
+    return xr + 1j * xi
+```
+
+4)  Explanation of Snippet 1 We implement complex conv via two real convs for real/imag weights: W = X
+
+-   i Y W=X+iY, input d = a
+-   i b d=a+ib. Derivation encoded in code: W ∗ d = ( X
+-   i Y ) ∗ ( a
+-   i b ) = ( X ∗ a − Y ∗ b )
+-   i ( Y ∗ a
+-   X ∗ b ) W∗d=(X+iY)∗(a+ib)=(X∗a−Y∗b)+i(Y∗a+X∗b). Matrix view (from the paper passage you cited): \[ R e ( W ∗ d ) I m ( W ∗ d )
+
+# \]
+
+\[ X − Y Y X
+
+\] ∗ \[ a b
+
+\] . \[ Re(W∗d) Im(W∗d) ​\
+\]=\[ X Y ​
+
+−Y X ​\
+\]∗\[ a b ​\
+\]. This block is the core layer used in CV-CNNs (per Trabelsi et al., 2018; Cole et al., 2021). 5) Code Snippet 2 — CReLU + Tiny Train Loop (≤20 lines) class CReLU(nn.Module): def **init**(self): super().\_\_init\_\_(); self.relu = nn.ReLU() def forward(self, x): return self.relu(x.real) + 1j \* self.relu(x.imag)
+
+X = torch.ones(1,1,5,5) + 1j*torch.ones(1,1,5,5) Y = torch.ones(1,1,5,5) + 1j*torch.ones(1,1,5,5)
+
+model = nn.Sequential( ComplexConv2d(1, 2, 3, padding='same'), CReLU(), ComplexConv2d(2, 1, 3, padding='same') ) opt = torch.optim.Adam(model.parameters(), lr=1e-1)
+
+for it in range(100): y = model(X); loss = (y - Y).abs().mean() opt.zero_grad(); loss.backward(); opt.step() if it % 10 == 0: print(f"{it:03d} loss={loss.item():.6f}") 6) Explanation of Snippet 2 CReLU: Applies ReLU separately to real and imaginary parts—simple, stable complex activation for bring-up. Loop: Demonstrates forward, gradients, and optimizer with complex tensors end-to-end. Why it’s key: Satisfies the checkpoint’s “working code evidence” and validates the complex graph before moving to MRI data. 7) Preliminary Result — Working Evidence Observed training-loss printout from the run (yours): 30.576448440551758 12.822955131530762 4.813802719116211 2.3371119499206543 0.9840127825737 0.6698686480522156 0.3220975399017334 0.6144604682922363 0.2962110638618469 0.6185105443000793 Takeaway: Loss decreases substantially across iterations, confirming correct wiring of ComplexConv2d + CReLU + optimizer for complex tensors. 8) Result Analysis & Next Steps Meaning: The complex pipeline runs and optimizes on toy data—forward/backward correctness ✅. Immediate next steps:
+
+Data & Masks: Load a tiny fastMRI split (e.g., knee single-coil); create k-space undersampling masks; build zero-filled baselines. Baselines: Implement a param-matched two-channel real CNN baseline; match depth/width and parameter count. Metrics: Compute SSIM/PSNR on a validation subset; report ΔSSIM/ΔPSNR (CV − Real) with slice-wise mean ± CI. Ablations: CReLU vs modReLU; padding “same” vs “valid”; optional real/imag weight tying. Reproducibility: Fixed seeds; single-GPU runtime budget; README with auto-download and exact edits for any borrowed code.

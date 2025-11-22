@@ -1,0 +1,21 @@
+\section{Introduction}
+% TODO: Replace placeholder "(PROVIDE CITATIONS)/(INSERT CITATION)" with actual references, smooth prose into full paragraphs,
+% explicitly mention fastMRI in motivation/goals, and note our scope differences (single-coil, fewer epochs) versus the original paper.
+\subsection{Clinical Motivation}
+    Magnetic Resonance Imaging (MRI) is a non-invasive imaging modality widely used for diagnosing musculoskeletal conditions. However, traditional MRI scans are time-consuming, often leading to patient discomfort and increased healthcare costs. Accelerated MRI techniques aim to reduce scan times by acquiring less data, but this introduces challenges in image reconstruction. Recent work (PROVIDE CITATIONS) has explored the use of deep learning models, particularly convolutional neural networks (CNNs), to reconstruct high-quality images from undersampled k-space data. They do so by taking the full k-space data, and simulating undersampling by applying a mask. They then reconstruct the image using both the complete and understampled data, and train a model to minimize the difference between the two reconstructions. With a sufficiently trained model, it becomes possible to significantly reduce MRI acquisition times while maintaining diagnostic image quality.
+\subsection{Paper to Reproduce}
+    Prior work in the field has primarily focused on real-valued CNNs when reconstructing MRI images from undersampled data. However, this information is inherently complex-valued, as MRI data consists of both magnitude and phase components. Researchers (INSERT CITATION) tackle this by either transforming complex data into two channels of real numbers, or by taking only the magnitude. Consequentially, the two channel approach may fail to model interactions between real and imaginary components, losing potentially valuable information, while the magnitude-only approach discards phase information entirely. Complex-valued CNNs, on the other hand, can directly process complex numbers, potentially leading to improved reconstruction quality. \cite{cole2020analysisdeepcomplexvaluedconvolutional} investigate the efficacy of fully complex-valued CNNs for MRI reconstruction, directly comparing them to their parameter-matched real-valued counterparts. Their experiments span unrolled networks and U-nets; however this paper will zoom in on the U-net comparison.
+\subsection{Reproduction Goals}
+    The primary objective of this project is to reproduce the key findings of \cite{cole2020analysisdeepcomplexvaluedconvolutional}, specifically the claim that parameter-matched complex-valued U-Nets outperform real-valued U-Nets in reconstructing undersampled MRI data. To achieve this I will:
+\begin{itemize}
+    \item Validate the zero-filled baseline across multiple mask settings to ensure preprocessing parity with fastMRI references.
+    \item Train parameter-matched real vs.\ complex U-Nets on a reproducible 1,024/256 slice split with identical seeds, optimizers, and logging utilities.
+    \item Quantitatively compare PSNR/SSIM/L1 and present qualitative slices analogous to those in \citet{cole2020analysisdeepcomplexvaluedconvolutional}.
+\end{itemize}
+\subsection{Contributions}
+\begin{enumerate}
+    \item \textbf{Baseline audit.} Document zero-fill performance for $R\in\{2,4,6,8\}$ and ACS$\in\{8,16,24\}$ with accompanying table and Figure~\ref{fig:zerofill_grid}.
+    \item \textbf{Reproducible pipeline.} Port mask generation, dataset loading, and real/complex models into a clean repo with configs, CLIs, and logging.
+    \item \textbf{Real vs.\ complex comparison.} Demonstrate that the complex U-Net retains higher fidelity at $R=4$ with the same parameter budget (Table~\ref{tab:main_results}, Figure~\ref{fig:qualitative}).
+    \item \textbf{Debug + ablation hooks.} Provide scripts/notebooks (e.g., \texttt{debug\_trainer.ipynb}) to trace instabilities and prepare for future ablations.
+\end{enumerate}

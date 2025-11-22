@@ -1,0 +1,27 @@
+\section{Methodology}
+\subsection{Dataset and Preprocessing}
+\begin{itemize}
+    \item \textbf{Splits.} 1,024 training slices and 256 validation slices sampled from the official fastMRI single-coil train/val sets (indices captured in config files for reproducibility).
+    \item \textbf{Preprocessing.} Load HDF5 k-space, apply equispaced mask with ACS=24 (offset fixed per slice), inverse FFT, add channel dimension, and center-crop to $640\times320$; normalize both masked and full images by the same slice-wise max magnitude (Section~\ref{sec:background}).
+    \item \textbf{Debug hooks.} The `debug_trainer.ipynb` notebook mirrors this pipeline exactly for rapid inspection; mention in Methods to justify hyperparameter tweaks.
+\end{itemize}
+\subsection{Baselines}
+\begin{itemize}
+    \item \textbf{Zero-filled reconstruction.} Baseline pipeline for evaluating masks; metrics stored in `results/<timestamp>_zerofill/zero_fill_metrics.csv` and visualized in Figure~\ref{fig:zerofill_grid}.
+    \item \textbf{Real U-Net.} Encoder/decoder widths $[64,128,256,512,1024]$ scaled by $1.416$ to match the target parameter count. Convs use ReLU, max-pooling in the encoder, bilinear interpolation safety via padding="same".
+    \item \textbf{Complex U-Net.} Same macro-architecture as the real model but implemented with ComplexConv2d/ComplexConvTranspose2d and CReLU activations; widths $[64,128,256,512,1024]$.
+\end{itemize}
+\subsection{Complex-Valued U-Net}
+\begin{itemize}
+    \item \textbf{Layers.} ComplexConv2d pairs (real + imag kernels) plus optional pooling layers; skip connections are resized via per-component interpolation to handle odd shapes.
+    \item \textbf{Activations.} CReLU applied to real/imag parts separately, as in \citet{cole2020analysisdeepcomplexvaluedconvolutional}.
+    \item \textbf{Normalization.} We rely on dataset-level magnitude normalization rather than complex batch norm to keep the implementation lightweight.
+\end{itemize}
+\subsection{Training and Evaluation Protocol}
+\begin{itemize}
+    \item \textbf{Hardware.} Apple M2 (MPS) laptop; all runs seeded (Python/NumPy/PyTorch) for determinism.
+    \item \textbf{Optimizer/schedule.} Adam with learning rate $5\times10^{-5}$ (after debugging), batch size 4, 15 epochs; no weight decay. Mention that a higher LR caused divergence for the complex net (cite debug appendix).
+    \item \textbf{Loss/metrics.} Primary loss is $\ell_1$ on complex outputs; PSNR/SSIM/L1 reported each epoch and saved to `metrics.csv`.
+    \item \textbf{Logging.} Each experiment writes results to `results/<timestamp>_<tag>/` with config snapshots, metrics CSV/JSON summaries, best/latest checkpoints, qualitative PNGs (Figure~\ref{fig:qualitative}), and optional tensor dumps for difference maps.
+\end{itemize}
+\end{itemize}

@@ -1,0 +1,7 @@
+\section{Conclusion}
+\begin{itemize}
+    \item \textbf{Summary.} Complex U-Net retains higher fidelity than the real baseline on single-coil fastMRI knees when trained under the same regime, reproducing the qualitative trend reported by Cole et al.
+    \item \textbf{What worked.} Shared magnitude normalization, deterministic mask generation, reproducible configs/CLIs, and the overnight batch runner allowed us to regenerate figures/tables quickly.
+    \item \textbf{What remains.} Larger datasets, phase metrics, and additional architectures are open directions; we also note that complex networks remain sensitive to LR, which should be highlighted in the final discussion.
+    \item \textbf{Artifacts.} Point readers to the repo tree: `results/` for metrics/checkpoints, `figures/` for plots, `report/paper/figures/` for publication-ready assets, and `notebooks/debug_trainer.ipynb` for troubleshooting.
+\end{itemize}
