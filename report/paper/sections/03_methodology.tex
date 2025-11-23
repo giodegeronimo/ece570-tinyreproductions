@@ -1,27 +1,15 @@
 \section{Methodology}
+% TODO: Ensure the stated splits (16,384/1,024) and $R=6$, ACS=20 configuration match Targets/Experiments/figures elsewhere.
 \subsection{Dataset and Preprocessing}
-\begin{itemize}
-    \item \textbf{Splits.} 1,024 training slices and 256 validation slices sampled from the official fastMRI single-coil train/val sets (indices captured in config files for reproducibility).
-    \item \textbf{Preprocessing.} Load HDF5 k-space, apply equispaced mask with ACS=24 (offset fixed per slice), inverse FFT, add channel dimension, and center-crop to $640\times320$; normalize both masked and full images by the same slice-wise max magnitude (Section~\ref{sec:background}).
-    \item \textbf{Debug hooks.} The `debug_trainer.ipynb` notebook mirrors this pipeline exactly for rapid inspection; mention in Methods to justify hyperparameter tweaks.
-\end{itemize}
-\subsection{Baselines}
-\begin{itemize}
-    \item \textbf{Zero-filled reconstruction.} Baseline pipeline for evaluating masks; metrics stored in `results/<timestamp>_zerofill/zero_fill_metrics.csv` and visualized in Figure~\ref{fig:zerofill_grid}.
-    \item \textbf{Real U-Net.} Encoder/decoder widths $[64,128,256,512,1024]$ scaled by $1.416$ to match the target parameter count. Convs use ReLU, max-pooling in the encoder, bilinear interpolation safety via padding="same".
-    \item \textbf{Complex U-Net.} Same macro-architecture as the real model but implemented with ComplexConv2d/ComplexConvTranspose2d and CReLU activations; widths $[64,128,256,512,1024]$.
-\end{itemize}
-\subsection{Complex-Valued U-Net}
-\begin{itemize}
-    \item \textbf{Layers.} ComplexConv2d pairs (real + imag kernels) plus optional pooling layers; skip connections are resized via per-component interpolation to handle odd shapes.
-    \item \textbf{Activations.} CReLU applied to real/imag parts separately, as in \citet{cole2020analysisdeepcomplexvaluedconvolutional}.
-    \item \textbf{Normalization.} We rely on dataset-level magnitude normalization rather than complex batch norm to keep the implementation lightweight.
-\end{itemize}
+The experiments utilize the fastMRI \cite{zbontar2019fastmriopendatasetbenchmarks} single-coil knee dataset, focusing on a subset of 16{,}384 training slices and 1{,}024 validation slices for computational tractability. Each slice is masked using an equispaced sampling pattern with an acceleration rate of $R=6$ and 20 ACS lines. Preprocessing involves applying the mask, performing an inverse FFT on both the original and masked k-space data to obtain inputs and targets, center-cropping to $640\times320$, and normalizing both tensors by the maximum magnitude of each slice. No augmentations are applied. The \texttt{debug\_trainer.ipynb} notebook mirrors this pipeline to facilitate reproducibility and debugging.
+% \begin{itemize}
+%     \item \textbf{Splits.} 1,024 training slices and 256 validation slices sampled from the official fastMRI single-coil train/val sets (indices captured in config files for reproducibility).
+%     \item \textbf{Preprocessing.} Load HDF5 k-space, apply equispaced mask with ACS=24 (offset fixed per slice), inverse FFT, add channel dimension, and center-crop to $640\times320$; normalize both masked and full images by the same slice-wise max magnitude (Section~\ref{sec:background}).
+%     \item \textbf{Debug hooks.} The `debug_trainer.ipynb` notebook mirrors this pipeline exactly for rapid inspection; mention in Methods to justify hyperparameter tweaks.
+% \end{itemize}
+\subsection{Baseline Masking}
+To benchmark the masking pipeline, zero-filled reconstructions are computed by applying the inverse FFT to the masked k-space data without any learned reconstruction. These reconstructions serve as a baseline for evaluating the performance of the U-Net models. The masks are generated using an equispaced sampling pattern with acceleration values $R \in \{1,2,3\}$ and ACS $\in \{16,20,24\}$. The qualitative and quantitative results are summarized in Figure~\ref{fig:zerofill_grid} and Table~\ref{tab:zerofill_metrics}, respectively.
+\subsection{Model Architectures}
+Two U-Net architectures are implemented: a real-valued U-Net and a complex-valued U-Net, both following the macro-architecture described in \citet{cole2020analysisdeepcomplexvaluedconvolutional}. The real-valued U-Net is scaled to match the parameter count of the complex U-Net by adjusting the number of feature channels. Both models consist of an encoder-decoder structure with skip connections, using convolutional layers, ReLU/CReLU activations, and appropriate upsampling/downsampling operations. The complex U-Net uses Encoder/decoder widths $[64,128,256,512,1024]$, while the real U-Net uses the same widths scaled by a factor of $1.416$ to ensure comparable model capacity. This resulted in each model having approximately 7.8 million parameters. Details for how the complex U-Net modules were implemented have been covered in Section~\ref{subsec:background}.
 \subsection{Training and Evaluation Protocol}
-\begin{itemize}
-    \item \textbf{Hardware.} Apple M2 (MPS) laptop; all runs seeded (Python/NumPy/PyTorch) for determinism.
-    \item \textbf{Optimizer/schedule.} Adam with learning rate $5\times10^{-5}$ (after debugging), batch size 4, 15 epochs; no weight decay. Mention that a higher LR caused divergence for the complex net (cite debug appendix).
-    \item \textbf{Loss/metrics.} Primary loss is $\ell_1$ on complex outputs; PSNR/SSIM/L1 reported each epoch and saved to `metrics.csv`.
-    \item \textbf{Logging.} Each experiment writes results to `results/<timestamp>_<tag>/` with config snapshots, metrics CSV/JSON summaries, best/latest checkpoints, qualitative PNGs (Figure~\ref{fig:qualitative}), and optional tensor dumps for difference maps.
-\end{itemize}
-\end{itemize}
+To mirror \cite{cole2020analysisdeepcomplexvaluedconvolutional}, both models are trained using the Adam optimizer with a learning rate of $1\times10^{-3}$ and betas $(0.9, 0.999)$. The paper reported training for roughly 50{,}000 steps, which corresponds to about 12 epochs with a batch size of 4 on the selected training subset. The primary loss function is $\ell_1$ computed between reconstructed and ground-truth complex images. Performance metrics (PSNR, SSIM, and $\ell_1$) are evaluated on the validation set after each epoch, and the best-performing checkpoints (based on validation PSNR) are saved for final evaluation and qualitative analysis.

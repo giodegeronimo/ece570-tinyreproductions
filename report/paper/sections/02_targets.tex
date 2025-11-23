@@ -1,22 +1,11 @@
 \section{Reproduction Target and Goals}
 \subsection{Target from Cole et al.}
-\begin{itemize}
-    \item Recreate the $R=4$ U-Net comparison (complex vs.\ real) focusing on PSNR/SSIM/L1 deltas and qualitative slices that illustrate detail retention.
-    \item Figures/tables to plan: Table~\ref{tab:main_results} (metrics) and Figure~\ref{fig:qualitative} (side-by-side reconstructions).
-\end{itemize}
-\subsection{Hypotheses}
-\begin{itemize}
-    \item H1: Complex U-Net outperforms the real U-Net by $\ge 0.3$\,dB PSNR and $\ge 0.01$ SSIM at $R=4$, ACS $=24$.
-    \item H2: Complex outputs suppress aliasing along cartilage edges / ligaments versus the real baseline when visualized on the same slices.
-    \item H3: With the reduced learning rate both models show stable training curves (validated via debug notebook plots).
-\end{itemize}
+\cite{cole2020analysisdeepcomplexvaluedconvolutional} demonstrated that the complex-valued U-Net architectured outperformed its real-valued counterpart for various settings of the acceleartion rate $R$, varying from $R=4$ to $R=9$. Due to time and resource constraints, I will focus on reproducing the $R=6$ results only, which is the middle of the range studied in the paper and should still be representative of the overall findings. Likewise, I will match the ACS lines to 20, as in the original paper. For this reproduction, I will focus on the fastMRI \cite{zbontar2019fastmriopendatasetbenchmarks} knee single-coil dataset only, as it is a reasonable subset of the most commonly used benchmark for MRI reconstruction tasks (fastMRI). I will train both the complex-valued U-Net and the real-valued U-Net baseline (with matching parameter counts) under identical conditions (dataset splits, hyperparameters, training epochs, random seeds) to compare their performance in terms of PSNR, SSIM, and L1 loss on the validation set.
 \subsection{Acceptance Criteria}
+To consider the reproduction successful, I will require the following criteria to be met:
 \begin{itemize}
-    \item Monotonic trend: zero-fill $<$ real U-Net $<$ complex U-Net for reported metrics.
+    \item Monotonic trend: zero-fill $<$ real U-Net $<$ complex U-Net for reported metrics on the validation dataset.
     \item Identical hyperparameters (LR, optimizer, dataset subsets, epochs, seed) across real/complex runs; any deviations must be documented.
 \end{itemize}
 \subsection{Scope and Simplifications}
-\begin{itemize}
-    \item Single-coil fastMRI knee only, 1,024/256 slices, 15 epochs, one seed.
-    \item No multi-coil experiments, adversarial losses, or alternate architectures to keep the reproduction tractable.
-\end{itemize}
+To keep the reproduction tractable within the constraints of time and computational resources, I only focus on the U-Net architecture and a single acceleration rate of $R=6$. I will not explore multi-coil data, adversarial losses, or alternate architectures. The experiments will be limited to a single pair of runs (real vs complex) with one random seed each, rather than multiple seeds for statistical significance. The details of these runs are covered in the subsequent sections.
