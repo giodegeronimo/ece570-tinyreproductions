@@ -1,8 +1,3 @@
+% TODO(Limitations): Revise once results are in (especially if complex underperforms); align slice counts/epochs with Methodology.
 \section{Limitations and Future Work}
-\begin{itemize}
-    \item \textbf{Data / compute budget.} Only 1,024/256 slices and 15 epochs; reproducing the full paper would require multi-dataset training and more aggressive augmentations.
-    \item \textbf{Hyperparameters.} We tuned the learning rate manually; no systematic sweep or cross-validation was performed. Complex models remain sensitive to LR and could benefit from gradient clipping or advanced optimizers.
-    \item \textbf{Architecture scope.} We focused solely on U-Nets. Cole et al.\ also studied unrolled networks and activation variants (modReLU, zReLU); these are future work items.
-    \item \textbf{Phase evaluation.} We only report magnitude metrics; the original paper emphasized phase reconstruction quality. Adding velocity/phase-sensitive metrics would strengthen the story.
-    \item \textbf{Future extensions.} Multi-coil experiments, different accelerations, activation function ablations, and exploring robustness to mask offsets.
-\end{itemize}
+This reproduction is intentionally narrow: I train a single seed on 16{,}384/1{,}024 slices for 12 epochs at $R=6$ with equispaced masks. Reproducing the full scope of \citet{cole2020analysisdeepcomplexvaluedconvolutional} would require multiple datasets, accelerations, and activation variants (e.g., modReLU, zReLU), plus more systematic hyperparameter sweeps. I also limit evaluation to magnitude-based PSNR/SSIM/$\ell_1$, whereas the original paper emphasized phase reconstruction quality; adding velocity/phase-sensitive metrics would strengthen the story. Future work includes multi-coil experiments, broader acceleration ranges, activation ablations, and robustness checks to mask offsets.

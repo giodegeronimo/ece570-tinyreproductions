@@ -1,7 +1,3 @@
+% TODO(Conclusion): Update claims once quantitative results are finalized; adjust if complex underperforms real baseline.
 \section{Conclusion}
-\begin{itemize}
-    \item \textbf{Summary.} Complex U-Net retains higher fidelity than the real baseline on single-coil fastMRI knees when trained under the same regime, reproducing the qualitative trend reported by Cole et al.
-    \item \textbf{What worked.} Shared magnitude normalization, deterministic mask generation, reproducible configs/CLIs, and the overnight batch runner allowed us to regenerate figures/tables quickly.
-    \item \textbf{What remains.} Larger datasets, phase metrics, and additional architectures are open directions; we also note that complex networks remain sensitive to LR, which should be highlighted in the final discussion.
-    \item \textbf{Artifacts.} Point readers to the repo tree: `results/` for metrics/checkpoints, `figures/` for plots, `report/paper/figures/` for publication-ready assets, and `notebooks/debug_trainer.ipynb` for troubleshooting.
-\end{itemize}
+I implemented and trained parameter-matched real and complex U-Nets on a trimmed fastMRI knee subset, logging zero-fill baselines, training curves, and qualitative slices for reproducibility. The repo now contains scripts, configs, and publication-ready figures/tables that make the comparison transparent, regardless of whether the complex model ultimately outperforms the real baseline. Remaining work includes scaling to larger datasets, adding phase-aware metrics, and extending beyond U-Nets, but the core pipeline is in place for others to reproduce or extend these findings.

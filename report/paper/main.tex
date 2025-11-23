@@ -6,6 +6,9 @@
 % Optional math commands from https://github.com/goodfeli/dlbook_notation.
 \input{math_commands.tex}
 
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{placeins}
 \usepackage{hyperref}
 \usepackage{url}
 
@@ -32,7 +35,7 @@ Anonymous Institution \\
 % Outline content placeholder until sections are populated.
 
 \begin{abstract}
-\textbf{Motivation.} Rapid MRI requires aggressive undersampling, but zero-filled reconstructions yield ringing and blur. \textbf{Goal.} Reproduce the key claim of \citet{cole2020analysisdeepcomplexvaluedconvolutional}: capacity-matched complex-valued CNNs outperform real-valued CNNs on accelerated single-coil knee data. \textbf{Approach.} fastMRI single-coil knee dataset, equispaced undersampling with ACS, complex U-Net vs. real U-Net, identical training/evaluation protocols. \textbf{Findings.} Outline planned quantitative comparison (PSNR/SSIM/L1 deltas), qualitative improvements, and reproducibility contributions. (Will be replaced with final summary.)
+Rapid MRI requires aggressive undersampling, but zero-filled reconstructions produce ringing and blur. I conduct a tiny reproduction of \citet{cole2020analysisdeepcomplexvaluedconvolutional} by training capacity-matched real and complex U-Nets on the fastMRI single-coil knee dataset with equispaced masks at $R=6$ (ACS=20). The pipeline logs zero-fill baselines, training curves, and qualitative slices, and saves publication-ready tables/figures for PSNR, SSIM, and $\ell_1$ comparisons. Preliminary runs suggest the gap between real and complex models may be narrower (or even reversed) at this reduced scale; final numbers will be inserted once the overnight experiments finish.
 \end{abstract}
 
 \input{sections/00_introduction}

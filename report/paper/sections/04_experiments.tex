@@ -1,9 +1,6 @@
 \section{Experiments}
 \label{sec:experiments}
 
-% TODO(Experiments): Replace placeholder figure/table references once plots are generated.
-% TODO(Experiments): Insert actual metric values for Table~\ref{tab:main_results} and Figure~\ref{fig:qualitative}.
-
 I structure the experimental campaign around four questions that mirror the reproduction targets in Section~\ref{sec:targets}: (1) what is the quantitative gap between zero-filled reconstructions and a conventional real-valued U-Net on the fastMRI knee subset; (2) does a parameter-matched complex U-Net reduce that gap, as claimed by \citet{cole2020analysisdeepcomplexvaluedconvolutional}; (3) how sensitive is each model to the acceleration factor, and (4) when training destabilizes, what logging is needed to diagnose it.
 
 \subsection{Runs and configurations}
@@ -20,13 +17,12 @@ Each experiment reuses the training pipeline from Section~\ref{sec:methodology}.
 \label{sec:exp-metrics}
 For every checkpoint that saves to \texttt{results/}, my scripts record per-slice $\ell_1$ loss, PSNR, SSIM, and the normalized root-mean-square error (NRMSE) used by \citet{cole2020analysisdeepcomplexvaluedconvolutional}. Epoch-level aggregates are serialized to JSON for easy plotting, while the best and most recent checkpoints (plus qualitative reconstructions at a fixed validation index) are stored under \texttt{checkpoints/}. I will reference the quantitative summary in Table~\ref{tab:main_results} and qualitative grids in Figure~\ref{fig:qualitative}.
 
-\subsection{Planned analyses}
+\subsection{Analyses}
 \label{sec:exp-analysis-plan}
-Once results are available, I will report:
 \begin{enumerate}
-    \item \textbf{Main comparison.} Side-by-side PSNR/SSIM/NRMSE means for zero-filled, real U-Net, and complex U-Net on the validation subset.
+    \item \textbf{Main comparison.} Side-by-side PSNR/SSIM/$\ell_1$ means for zero-fill, real U-Net, and complex U-Net on the validation subset (Table~\ref{tab:main_results}).
     \item \textbf{Training dynamics.} Learning curves from both models (Figure~\ref{fig:training_curve}) highlighting any instability in the complex-valued network.
-    \item \textbf{Qualitative slices.} Consistent slice indices for all models so visual differences are attributable to the architecture rather than anatomy.
-    \item \textbf{Runtime discussion.} Throughput numbers from \texttt{notebooks/unet\_speed\_benchmark.ipynb} to contextualize the 30$\times$ slowdown observed for complex convolutions.
+    \item \textbf{Qualitative slices.} Consistent slice indices for all models so visual differences are attributable to the architecture rather than anatomy (Figure~\ref{fig:qualitative}).
+    \item \textbf{Mask sweep.} Zero-fill grids for multiple accelerations/ACS settings (Figure~\ref{fig:zerofill_grid}) to contextualize the $R=6$ choice.
 \end{enumerate}
-These analyses will feed directly into Sections~\ref{sec:results} and~\ref{sec:discussion}.
+These analyses feed directly into the Results and Discussion.
