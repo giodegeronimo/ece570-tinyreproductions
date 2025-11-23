@@ -39,7 +39,7 @@ class SingleCoilDataset(Dataset):
         self.filepath_slice_idxs: Sequence[Tuple[str, int]] = filepath_slice_idxs
 
         # Normalize image sizes via center crop (fastMRI single-coil knee varies by scanner).
-        self.crop = torchvision.transforms.CenterCrop((320, 256)) #((640, 320))
+        self.crop = torchvision.transforms.CenterCrop((640, 320))
 
     def __len__(self) -> int:
         """Return number of slice samples across the dataset."""
@@ -58,9 +58,10 @@ class SingleCoilDataset(Dataset):
         image_full = image_full.unsqueeze(0)
 
         # Normalize to max abs value in full image.
-        scale = torch.max(image_full.abs()).clamp_min(1e-8)
-        image_full = image_full / scale
-        image_masked = image_masked / scale
+        scale_full = torch.max(image_full.abs()).clamp_min(1e-8)
+        scale_masked = torch.max(image_masked.abs()).clamp_min(1e-8)
+        image_full = image_full / scale_full
+        image_masked = image_masked / scale_masked
 
         # Apply center crop for consistent geometry.
         image_masked = self.crop(image_masked)
