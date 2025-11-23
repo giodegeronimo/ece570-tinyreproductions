@@ -208,12 +208,6 @@ def complex_init_trabelsi_conv_like(conv_r: nn.Module,
     w_r[:] = r * torch.cos(theta)
     w_i[:] = r * torch.sin(theta)
 
-    # Zero biases in the convs; you already have a separate complex bias param
-    if conv_r.bias is not None:
-        conv_r.bias.data.zero_()
-    if conv_i.bias is not None:
-        conv_i.bias.data.zero_()
-
     
 class ComplexConv2d(nn.Module):
     '''
@@ -224,9 +218,7 @@ class ComplexConv2d(nn.Module):
         super().__init__()
         self.conv_real = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=False, padding_mode=padding_mode, device=device, dtype=dtype)
         self.conv_imag = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=False, padding_mode=padding_mode, device=device, dtype=dtype)
-        complex_init_trabelsi_conv_like(self.conv_real, self.conv_imag, criterion="he")
-        # self.conv_real.weight.data.mul_(1/2**0.5)
-        # self.conv_imag.weight.data.mul_(1/2**0.5)
+        complex_init_trabelsi_conv_like(self.conv_real, self.conv_imag, criterion="glorot")
         self.bn = ComplexBatchNorm2d(out_channels) if use_bn else None
         self.bias = nn.Parameter(torch.zeros((out_channels, 2))) if bias else None
     def forward(self, X):
@@ -249,9 +241,7 @@ class ComplexConvTranspose2d(nn.Module):
         super().__init__()
         self.tconv_real = nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=False, padding_mode=padding_mode, device=device, dtype=dtype)
         self.tconv_imag = nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, groups=groups, bias=False, padding_mode=padding_mode, device=device, dtype=dtype)
-        complex_init_trabelsi_conv_like(self.tconv_real, self.tconv_imag, criterion="he")
-        # self.tconv_real.weight.data.mul_(1/2**0.5)
-        # self.tconv_imag.weight.data.mul_(1/2**0.5)
+        complex_init_trabelsi_conv_like(self.tconv_real, self.tconv_imag, criterion="glorot")
         self.bn = ComplexBatchNorm2d(out_channels) if use_bn else None
         self.bias = nn.Parameter(torch.zeros((out_channels, 2))) if bias else None
     def forward(self, X):
