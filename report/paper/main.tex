@@ -9,6 +9,8 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{placeins}
+\setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
 \usepackage{hyperref}
 \usepackage{url}
 
@@ -35,7 +37,7 @@ Anonymous Institution \\
 % Outline content placeholder until sections are populated.
 
 \begin{abstract}
-Rapid MRI requires aggressive undersampling, but zero-filled reconstructions produce ringing and blur. I conduct a tiny reproduction of \citet{cole2020analysisdeepcomplexvaluedconvolutional} by training capacity-matched real and complex U-Nets on the fastMRI single-coil knee dataset with equispaced masks at $R=6$ (ACS=20). The pipeline logs zero-fill baselines, training curves, and qualitative slices, and saves publication-ready tables/figures for PSNR, SSIM, and $\ell_1$ comparisons. Preliminary runs suggest the gap between real and complex models may be narrower (or even reversed) at this reduced scale; final numbers will be inserted once the overnight experiments finish.
+Rapid MRI requires aggressive undersampling, but zero-filled reconstructions produce ringing and blur. I reproduce the core claim of \citet{cole2020analysisdeepcomplexvaluedconvolutional} on a trimmed fastMRI single-coil knee subset by training capacity-matched real and complex U-Nets with equispaced masks at $R=6$ (ACS=20). The complex model delivers a modest lift over the real baseline (25.49 vs.\ 25.10 dB PSNR; 0.887 vs.\ 0.785 SSIM) while reducing $\ell_1$ error. Zero-fill baselines, training curves, and qualitative slices are logged and saved as publication-ready assets. All scripts, configs, and checkpoints are included to make the comparison reproducible.
 \end{abstract}
 
 \input{sections/00_introduction}

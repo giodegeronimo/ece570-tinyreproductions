@@ -2,9 +2,9 @@
 \label{sec:results}
 \label{sec:discussion}
 \subsection{Quantitative Summary}
-Table~\ref{tab:main_results} reports PSNR/SSIM/$\ell_1$ for zero-fill, the real U-Net, and the complex U-Net at $R=6$, ACS=20 on the 1{,}024-slice validation set. My focus is on whether the complex model improves over the real baseline under a matched parameter budget; if it does not, that outcome is stated plainly with the same metrics the original paper used. The zero-fill sweep in Table~\ref{tab:zerofill_metrics} provides context for how much lift either model delivers over a non-learned reconstruction.
+Table~\ref{tab:main_results} reports PSNR/SSIM/$\ell_1$ for zero-fill, the real U-Net, and the complex U-Net at $R=6$, ACS=20 on the 1{,}024-slice validation set. Zero-fill reaches 21.78 dB PSNR and 0.878 SSIM; the real U-Net improves to 25.10 dB PSNR but lags in SSIM (0.785). The complex U-Net edges ahead at 25.49 dB PSNR, 0.887 SSIM, and the lowest $\ell_1$ (0.0408), indicating a modest but consistent lift over the real baseline with matched capacity. The zero-fill sweep in Table~\ref{tab:zerofill_metrics} provides context for how much lift either model delivers over a non-learned reconstruction.
 
-\begin{table}[t]
+\begin{table}[h]
 \centering
 \caption{Validation metrics at $R=6$, ACS=20 for zero-fill, real U-Net, and complex U-Net (PSNR/SSIM/$\ell_1$).}
 \label{tab:main_results}
@@ -22,9 +22,9 @@ Complex U-Net & 25.49 & 0.887 & 0.0408 \\
 \subsection{Qualitative Observations}
 Figure~\ref{fig:qualitative} shows matched slices for zero-fill, real U-Net, complex U-Net, and ground truth at a fixed validation index. PSNR and SSIM are overlaid on each panel so the visual and quantitative signals align. Figure~\ref{fig:zerofill_grid} illustrates how the zero-fill appearance changes with different accelerations and ACS widths, anchoring the $R=6$ choice.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.5\linewidth]{figures/fig_qualitative_idx_50_250_630.png}
+\includegraphics[width=0.65\linewidth]{figures/fig_qualitative_idx_50_250_630.png}
 \caption{Qualitative reconstructions at a fixed validation index (zero-fill, real U-Net, complex U-Net, ground truth) with PSNR/SSIM overlaid.}
 \label{fig:qualitative}
 \end{figure}
@@ -32,7 +32,7 @@ Figure~\ref{fig:qualitative} shows matched slices for zero-fill, real U-Net, com
 \subsection{Training Stability and Debugging}
 Training curves in Figure~\ref{fig:training_curve} combine per-step losses with epoch-level PSNR. These curves make it easy to see when the complex model drifts or diverges and how that compares to the real baseline under the same optimizer, schedule, and seed. Any hyperparameter adjustments will be tied back to these curves and to the saved step-level CSVs.
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
 \includegraphics[width=0.9\linewidth]{figures/fig_training_curve.png}
 \caption{Training curves showing per-step losses (left) and validation PSNR per epoch (right) for real and complex U-Nets.}
@@ -42,7 +42,7 @@ Training curves in Figure~\ref{fig:training_curve} combine per-step losses with 
 \subsection{Zero-Fill Baseline Context}
 Table~\ref{tab:zerofill_metrics} summarizes zero-fill PSNR/SSIM/$\ell_1$ across accelerations and ACS widths, and Figure~\ref{fig:zerofill_grid} shows a representative slice at those settings.
 
-\begin{table}[t]
+\begin{table}[h]
 \centering
 \caption{Zero-fill baseline across accelerations and ACS widths (PSNR/SSIM/$\ell_1$).}
 \label{tab:zerofill_metrics}
@@ -58,14 +58,14 @@ Accel & ACS & PSNR (dB) & SSIM \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[t]
+\begin{figure}[h]
 \centering
-\includegraphics[width=0.5\linewidth]{figures/fig_zerofill_idx_50.png}
+\includegraphics[width=0.65\linewidth]{figures/fig_zerofill_idx_50.png}
 \caption{Zero-fill reconstructions across accelerations and ACS settings for a representative slice.}
 \label{fig:zerofill_grid}
 \end{figure}
 
 \FloatBarrier
 
-\subsection{Discrepancies vs.\ Original Paper}
-% TODO(Results): Add a short paragraph here once final results are in to explain differences from \citet{cole2020analysisdeepcomplexvaluedconvolutional} (datasets, epochs, acceleration range, and performance gaps).
+\subsection{Scope differences vs.\ original}
+This reproduction is narrower than \citet{cole2020analysisdeepcomplexvaluedconvolutional}: I use single-coil fastMRI knees only (no multi-coil or multi-dataset setting), equispaced masks at a fixed $R=6$/ACS=20 instead of variable-density Poisson masks across accelerations, and ~50k steps on 16k/1k slices with a single seed. I also restrict the comparison to U-Nets (no unrolled networks or activation-function ablations) and report magnitude PSNR/SSIM/$\ell_1$ without phase-specific metrics. These differences likely explain why the complex model’s gain is modest relative to the larger improvements reported in the original paper.
