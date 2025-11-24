@@ -6,11 +6,11 @@ This project reproduces the core claim of Cole et al. (complex-valued CNNs can o
 - Data: fastMRI single-coil knees; equispaced mask with acceleration **R=6** and **ACS=20**; slice-wise max-magnitude normalization.
 - Split: **8,192** train slices, **1,024** val slices.
 - Models: real U-Net (width × **1.42**) vs. complex U-Net (widths [16, 32, 64, 128, 256]); both ~**12.6M** params.
-- Training: Adam (1e-3), batch 4, ~50k steps (~12 epochs), fixed seed/mask indices.
+- Training: Adam (1e-3), batch 2, 12 epochs (~50k steps), fixed seed/mask indices.
 - Val metrics @ R=6, ACS=20 (PSNR / SSIM / ℓ1): Zero-fill 21.78 / 0.878 / 0.0584; Real U-Net 25.10 / 0.785 / 0.0462; **Complex U-Net 25.49 / 0.887 / 0.0408**.
 - Paper figures: `report/paper/figures/fig_training_curve.png`, `report/paper/figures/fig_qualitative_idx_50_250_630.png`, Table 1 in `report/paper/tables/table_main_results.csv`.
 
-## Repository layout (final)
+## Repository layout
 ```
 data/               # fastMRI tarballs and extracted singlecoil_{train,val,test}
 notebooks/          # experiment_runner.ipynb (train/log), figures_tables.ipynb (render figs/tables)
@@ -51,13 +51,6 @@ export PYTHONPATH=$PWD
    These files are already updated with the final runs.
 
 ## Paper, poster, video
-- Paper: `report/paper/main.tex`, compiled to `report/paper/build/main.pdf`; flat file via `main_flat.tex`.
+- Paper: `report/paper/main.tex`, compiled to `report/paper/build/main.pdf`.
 - Poster: BetterPoster content in `report/betterposter/` (48x36, PDF export).
-- Video: 5-minute screencast outline in `report/video/` (describe problem → setup → how to run → results → scope/limitations).
-
-## Original vs. adapted (high level)
-- `src/models/real_unet.py`, `src/models/cx_unet.py`, `src/data/*`, `notebooks/experiment_runner.ipynb`, `notebooks/figures_tables.ipynb`: authored for this reproduction, informed by Cole et al. for architecture choice and matching capacity.
-- LaTeX template under `report/paper/template/` is the official ICLR 2026 style; main.tex and sections are ours.
-
-## Anonymity
-No names or identifiers appear in code, figures, poster, or paper (per course policy). Copy checkpoints/results as needed, but keep author fields empty in commits and artifacts.
+- Video: Link to video is provided in `report/video/video_link.txt`.
