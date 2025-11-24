@@ -1,28 +1,17 @@
 \section{Experiments}
 \label{sec:experiments}
 
-I structure the experimental campaign around four questions that mirror the reproduction targets in Section~\ref{sec:targets}: (1) what is the quantitative gap between zero-filled reconstructions and a conventional real-valued U-Net on the fastMRI knee subset; (2) does a parameter-matched complex U-Net reduce that gap, as claimed by \citet{cole2020analysisdeepcomplexvaluedconvolutional}; (3) how sensitive is each model to the acceleration factor, and (4) when training destabilizes, what logging is needed to diagnose it.
+I structure the experiments around a lean, single-seed comparison at fastMRI R=6, ACS=20: a capacity-matched real U-Net versus a complex U-Net trained on 8,192/1,024 slices, with identical masks, seeds, and optimizer. The goals are to (1) quantify the gap between the two models on the validation set (Table~\ref{tab:main_results}), (2) examine training dynamics (Figure~\ref{fig:training_curve}), and (3) show matched qualitative reconstructions at fixed validation indices (Figure~\ref{fig:qualitative}), while logging configs/checkpoints for reproducibility.
 
 \subsection{Runs and configurations}
 \label{sec:exp-runs}
-Each experiment reuses the training pipeline from Section~\ref{sec:methodology}. I seed the data loaders, model weights, and masking so that the real- and complex-valued models see the exact same batches. The following runs are scheduled:
-\begin{itemize}
-    \item \textbf{Zero-filled baseline.} No learning. I compute masked inverse FFTs for every validation slice to anchor Table~\ref{tab:main_results}. This also supplies the left panel of each qualitative grid.
-    \item \textbf{Real U-Net.} The width configuration is identical to Section~\ref{sec:methodology}, yielding roughly $7.8$\,M parameters. This is my control reproduction of the ``two-channel'' approach reported in the original paper.
-    \item \textbf{Complex U-Net.} I halve the width factors so that the total parameter count (real+imaginary) matches the real-valued model, keeping optimizer, schedule, and checkpoint cadence unchanged.
-    \item \textbf{Stress tests / ablations.} When training diverges (observed in the debug notebook), I re-run with the same seed but different learning rates or gradient clipping thresholds. These runs will be summarized qualitatively in the Discussion.
-\end{itemize}
+Each experiment reuses the training pipeline from Section~\ref{sec:methodology}. I seed the data loaders, model weights, and masking so that the real and complex-valued models see the exact same batches. Two runs are executed: a complex U-Net with the base widths $[16,32,64,128,256]$, and a real U-Net with the same widths scaled by $1.42\times$ for parameter parity (about 12.6M parameters). Optimizer, schedule, and checkpoints are identical across the two learned models. All learned runs use 8{,}192 training slices and 1{,}024 validation slices.
 
 \subsection{Metrics and logging}
 \label{sec:exp-metrics}
-For every checkpoint that saves to \texttt{results/}, my scripts record per-slice $\ell_1$ loss, PSNR, SSIM, and the normalized root-mean-square error (NRMSE) used by \citet{cole2020analysisdeepcomplexvaluedconvolutional}. Epoch-level aggregates are serialized to JSON for easy plotting, while the best and most recent checkpoints (plus qualitative reconstructions at a fixed validation index) are stored under \texttt{checkpoints/}. I will reference the quantitative summary in Table~\ref{tab:main_results} and qualitative grids in Figure~\ref{fig:qualitative}.
+For every checkpoint that saves to \texttt{results/}, my notebooks record $\ell_1$ loss, PSNR, and SSIM on the validation set. Epoch-level aggregates are serialized to JSON for easy plotting, while the best and most recent checkpoints (plus qualitative reconstructions at a fixed validation index) are stored as well. I will reference the quantitative summary in Table~\ref{tab:main_results} and qualitative grids in Figure~\ref{fig:qualitative}.
 
 \subsection{Analyses}
 \label{sec:exp-analysis-plan}
-\begin{enumerate}
-    \item \textbf{Main comparison.} Side-by-side PSNR/SSIM/$\ell_1$ means for zero-fill, real U-Net, and complex U-Net on the validation subset (Table~\ref{tab:main_results}).
-    \item \textbf{Training dynamics.} Learning curves from both models (Figure~\ref{fig:training_curve}) highlighting any instability in the complex-valued network.
-    \item \textbf{Qualitative slices.} Consistent slice indices for all models so visual differences are attributable to the architecture rather than anatomy (Figure~\ref{fig:qualitative}).
-    \item \textbf{Mask sweep.} Zero-fill grids for multiple accelerations/ACS settings (Figure~\ref{fig:zerofill_grid}) to contextualize the $R=6$ choice.
-\end{enumerate}
+This study reports (1) side-by-side PSNR/SSIM/$\ell_1$ for the real and complex U-Nets on the validation subset (Table~\ref{tab:main_results}), (2) training dynamics via loss/PSNR curves (Figure~\ref{fig:training_curve}), and (3) matched qualitative slices for both models (Figure~\ref{fig:qualitative}).
 These analyses feed directly into the Results and Discussion.

@@ -9,6 +9,7 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{placeins}
+\usepackage{float}
 \setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
 \setlength{\floatsep}{6pt plus 2pt minus 2pt}
 \usepackage{hyperref}
@@ -37,7 +38,7 @@ Anonymous Institution \\
 % Outline content placeholder until sections are populated.
 
 \begin{abstract}
-Rapid MRI requires aggressive undersampling, but zero-filled reconstructions produce ringing and blur. I reproduce the core claim of \citet{cole2020analysisdeepcomplexvaluedconvolutional} on a trimmed fastMRI single-coil knee subset by training capacity-matched real and complex U-Nets with equispaced masks at $R=6$ (ACS=20). The complex model delivers a modest lift over the real baseline (25.49 vs.\ 25.10 dB PSNR; 0.887 vs.\ 0.785 SSIM) while reducing $\ell_1$ error. Zero-fill baselines, training curves, and qualitative slices are logged and saved as publication-ready assets. All scripts, configs, and checkpoints are included to make the comparison reproducible.
+Rapid MRI requires aggressive undersampling to make scan times reasonable, replacing missing values with zeros. However, zero-filled reconstructions produce ringing and blur. I reproduce the core claim of \citet{cole2020analysisdeepcomplexvaluedconvolutional}, which is that capacity-matched complex CNNs can surpass real CNNs in refining zero-filled reconstructions to match fully sampled ones. I do so on a trimmed fastMRI single-coil knee subset by training matched real and complex U-Nets with equispaced masks at $R=6$ and $ACS=20$. The complex model delivers a modest lift over the real baseline (25.49 vs.\ 25.10 dB PSNR; 0.887 vs.\ 0.785 SSIM) while reducing $\ell_1$ error. Training curves and qualitative slices are logged and saved as publication-ready assets; notebooks, configs, and checkpoints make the comparison reproducible.
 \end{abstract}
 
 \input{sections/00_introduction}
@@ -46,7 +47,6 @@ Rapid MRI requires aggressive undersampling, but zero-filled reconstructions pro
 \input{sections/03_methodology}
 \input{sections/04_experiments}
 \input{sections/05_results_discussion}
-\input{sections/06_limitations}
 \input{sections/07_conclusion}
 
 \bibliography{refs}
