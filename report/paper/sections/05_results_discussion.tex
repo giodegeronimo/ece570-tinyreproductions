@@ -12,9 +12,9 @@ Table~\ref{tab:main_results} reports PSNR/SSIM/$\ell_1$ for zero-fill, the real 
 \toprule
 Model & PSNR (dB) & SSIM & $\ell_1$ \\
 \midrule
-Zero-fill & TBD & TBD & TBD \\
-Real U-Net & TBD & TBD & TBD \\
-Complex U-Net & TBD & TBD & TBD \\
+Zero-fill & 21.78 & 0.878 & 0.0584 \\
+Real U-Net & 25.10 & 0.785 & 0.0462 \\
+Complex U-Net & 25.49 & 0.887 & 0.0408 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -24,7 +24,7 @@ Figure~\ref{fig:qualitative} shows matched slices for zero-fill, real U-Net, com
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_qualitative_idx_50.png}
+\includegraphics[width=0.5\linewidth]{figures/fig_qualitative_idx_50_250_630.png}
 \caption{Qualitative reconstructions at a fixed validation index (zero-fill, real U-Net, complex U-Net, ground truth) with PSNR/SSIM overlaid.}
 \label{fig:qualitative}
 \end{figure}
@@ -46,18 +46,21 @@ Table~\ref{tab:zerofill_metrics} summarizes zero-fill PSNR/SSIM/$\ell_1$ across 
 \centering
 \caption{Zero-fill baseline across accelerations and ACS widths (PSNR/SSIM/$\ell_1$).}
 \label{tab:zerofill_metrics}
-\begin{tabular}{ccc}
+\begin{tabular}{cccc}
 \toprule
-Accel / ACS & PSNR (dB) & SSIM \\
+Accel & ACS & PSNR (dB) & SSIM \\
 \midrule
-TBD & TBD & TBD \\
+2 & 20 & 25.79 & 0.943 \\
+4 & 20 & 21.81 & 0.881 \\
+6 & 20 & 21.78 & 0.878 \\
+8 & 20 & 19.81 & 0.832 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{figure}[t]
 \centering
-\includegraphics[width=\linewidth]{figures/fig_zerofill_idx_50.png}
+\includegraphics[width=0.5\linewidth]{figures/fig_zerofill_idx_50.png}
 \caption{Zero-fill reconstructions across accelerations and ACS settings for a representative slice.}
 \label{fig:zerofill_grid}
 \end{figure}
